@@ -247,6 +247,13 @@ class Php implements GeneratorInterface
 
             $type = $property->getType();
             if (!empty($type)) {
+                if (is_array($type)) {
+                    $complex = '';
+                    foreach ($type as $t) {
+                        $complex .= (is_array($t) ? $t['type'] : $t) . '|';
+                    }
+                    $type = rtrim($complex, '|');
+                }
                 $comment.= ' * @Type("' . $type . '")' . "\n";
             }
 

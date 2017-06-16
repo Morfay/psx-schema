@@ -39,6 +39,7 @@ use PSX\Schema\Parser\JsonSchema\RefResolver;
 class SchemaManager implements SchemaManagerInterface
 {
     const TYPE_JSONSCHEMA = 'jsonschema';
+    const TYPE_AVROSCHEMA = 'avrochema';
     const TYPE_CLASS      = 'class';
     const TYPE_ANNOTATION = 'annotation';
 
@@ -104,6 +105,8 @@ class SchemaManager implements SchemaManagerInterface
         if ($type === self::TYPE_JSONSCHEMA) {
             $resolver = RefResolver::createDefault($this->httpClient);
             $schema = Parser\JsonSchema::fromFile($schemaName, $resolver);
+        } elseif ($type === self::TYPE_AVROSCHEMA) {
+            $schema = Parser\AvroSchema::fromFile($schemaName);
         } elseif ($type === self::TYPE_CLASS) {
             $schema = new $schemaName($this);
         } elseif ($type === self::TYPE_ANNOTATION) {
@@ -128,6 +131,9 @@ class SchemaManager implements SchemaManagerInterface
     private function guessTypeFromSchema($schemaName)
     {
         if (strpos($schemaName, '.') !== false) {
+            if (strpos($schemaName, 'avro') !== false) {
+                return self::TYPE_AVROSCHEMA;
+            }
             return self::TYPE_JSONSCHEMA;
         } elseif (class_exists($schemaName)) {
             if (in_array(SchemaInterface::class, class_implements($schemaName))) {
